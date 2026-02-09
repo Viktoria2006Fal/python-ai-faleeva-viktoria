@@ -1,0 +1,22 @@
+# Этот SPARQL-запрос извлекает ретейл-компании с обязательными данными: год основания и страна, а также опциональными: организационно-правовая форма и количество сотрудников.
+# This SPARQL query retrieves retail companies with mandatory data: year of inception and country, and optional: legal form and number of employees.
+
+SELECT DISTINCT ?company ?companyLabel ?inceptionYear ?countryLabel ?legalFormLabel ?employees WHERE {
+  ?company wdt:P31/wdt:P279* wd:Q126793.  # Извлекаем компании, которые являются экземплярами или подклассами "предприятия розничной торговли"
+
+  # Год основания (обязательно)
+  ?company wdt:P571 ?inceptionDate. BIND(YEAR(?inceptionDate) AS ?inceptionYear)  # Извлекаем год основания компании
+
+  # Страна происхождения (обязательно)
+  ?company wdt:P17 ?country.  # Извлекаем страну происхождения компании
+
+  # Организационно-правовая форма (опционально)
+  OPTIONAL { ?company wdt:P1454 ?legalForm. }  # Извлекаем организационно-правовую форму, если она указана
+
+  # Количество сотрудников (опционально)
+  OPTIONAL { ?company wdt:P1128 ?employees. }  # Извлекаем количество сотрудников, если оно указано
+
+  # Метки для удобства чтения (только на русском)
+  SERVICE wikibase:label { bd:serviceParam wikibase:language "ru". }  # Устанавливаем язык меток на русский
+}
+LIMIT 500
