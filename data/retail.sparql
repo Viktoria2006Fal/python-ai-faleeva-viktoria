@@ -17,5 +17,5 @@ SELECT DISTINCT ?company ?companyLabel ?inceptionYear ?countryLabel ?legalFormLa
   OPTIONAL { ?company wdt:P1128 ?employees. }  # Извлекаем количество сотрудников, если оно указано
 
   # Метки для удобства чтения (только на русском)
-  SERVICE wikibase:label { bd:serviceParam wikibase:language "ru". }  # Устанавливаем язык меток на русский
+  SERVICE wikibase:label { bd:serviceParam wikibase:language "ru,en". }  # Устанавливаем язык меток на русский
 }
