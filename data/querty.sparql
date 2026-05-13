@@ -1,0 +1,94 @@
+# Этот SPARQL-запрос извлекает ретейл-компании выбранных типов с обязательными данными: тип-источник, страна и год основания,
+# а также опциональными: все типы компании, организационно-правовая форма, количество сотрудников, штаб-квартира,
+# отрасль, продукт, основатель, материнская организация, собственник и год прекращения существования.
+# This SPARQL query retrieves retail companies of selected types with mandatory data: seed type, country and year of inception,
+# and optional: all company types, legal form, number of employees, headquarters, industry, product, founder, parent organization,
+# owner and year of dissolution.
+
+SELECT DISTINCT
+  ?company ?companyLabel
+  ?seedType ?seedTypeLabel
+  ?companyType ?companyTypeLabel
+  ?inceptionYear
+  ?country ?countryLabel
+  ?legalForm ?legalFormLabel
+  ?employees
+  ?hq ?hqLabel
+  ?industry ?industryLabel
+  ?product ?productLabel
+  ?founder ?founderLabel
+  ?parentOrg ?parentOrgLabel
+  ?ownedBy ?ownedByLabel
+  ?dissolvedYear
+WHERE {
+  # Целевые типы компаний (обязательно)
+  # Target company types (mandatory)
+  VALUES ?seedType {
+    wd:Q64027599  # gas station chain / сеть АЗС
+    wd:Q205495    # filling station / автомобильная заправочная станция
+    wd:Q126793    # retail / розничная торговля
+    wd:Q998426    # bookselling / книготорговля
+    wd:Q331814    # retail chain / торговая сеть
+  }
+
+  # Компания должна иметь хотя бы один из целевых типов (обязательно)
+  # Company must have at least one of the target types (mandatory)
+  ?company wdt:P31 ?seedType.
+
+  # Страна происхождения (обязательно)
+  # Country of origin (mandatory)
+  ?company wdt:P17 ?country.
+
+  # Дата основания (обязательно) -> извлекаем год
+  # Date of inception (mandatory) -> extract year
+  ?company wdt:P571 ?inceptionDate.
+  BIND(YEAR(?inceptionDate) AS ?inceptionYear)
+
+  # Все значения P31 (instance of) - опционально
+  # All P31 values (instance of) - optional
+  OPTIONAL { ?company wdt:P31 ?companyType. }
+
+  # Организационно-правовая форма (опционально)
+  # Legal form (optional)
+  OPTIONAL { ?company wdt:P1454 ?legalForm. }
+
+  # Количество сотрудников (опционально)
+  # Number of employees (optional)
+  OPTIONAL { ?company wdt:P1128 ?employees. }
+
+  # Штаб-квартира (опционально)
+  # Headquarters (optional)
+  OPTIONAL { ?company wdt:P159 ?hq. }
+
+  # Отрасль (опционально)
+  # Industry (optional)
+  OPTIONAL { ?company wdt:P452 ?industry. }
+
+  # Производимый продукт / материал (опционально)
+  # Produced product / material (optional)
+  OPTIONAL { ?company wdt:P1056 ?product. }
+
+  # Основатель (опционально)
+  # Founder (optional)
+  OPTIONAL { ?company wdt:P112 ?founder. }
+
+  # Материнская организация (опционально)
+  # Parent organization (optional)
+  OPTIONAL { ?company wdt:P749 ?parentOrg. }
+
+  # Собственник (опционально)
+  # Owner (optional)
+  OPTIONAL { ?company wdt:P127 ?ownedBy. }
+
+  # Дата прекращения существования (опционально) -> извлекаем год
+  # Date of dissolution (optional) -> extract year
+  OPTIONAL {
+    ?company wdt:P576 ?dissolvedDate.
+    BIND(YEAR(?dissolvedDate) AS ?dissolvedYear)
+  }
+
+  # Метки для удобства чтения (русский, английский, другие языки)
+  # Labels for readability (Russian, English, other languages)
+  SERVICE wikibase:label { bd:serviceParam wikibase:language "ru,en,mul". }
+}
+ORDER BY ?countryLabel ?seedTypeLabel ?companyLabel ?companyTypeLabel ?productLabel
